@@ -1,71 +1,66 @@
 class Article {
-  String? section;
-  String? subsection;
-  String? title;
-  String? abstract;
-  String? url;
-  String? uri;
-  String? byline;
-  String? itemType;
-  String? updatedDate;
-  String? createdDate;
-  String? publishedDate;
-  String? materialTypeFacet;
-  String? kicker;
-  List<String>? desFacet;
-  List<String>? orgFacet;
-  List<String>? perFacet;
-  List<String>? geoFacet;
-  List<Multimedia>? multimedia;
-  String? shortUrl;
+  String section;
+  String subsection;
+  String title;
+  String abstract;
+  String url;
+  String uri;
+  String byline;
+  String itemType;
+  String updatedDate;
+  String createdDate;
+  String publishedDate;
+  String materialTypeFacet;
+  String kicker;
+  List<String> desFacet;
+  List<String> orgFacet;
+  List<String> perFacet;
+  List<String> geoFacet;
+  List<Multimedia> multimedia;
+  String shortUrl;
 
   Article(
-      {this.section,
-      this.subsection,
-      this.title,
-      this.abstract,
-      this.url,
-      this.uri,
-      this.byline,
-      this.itemType,
-      this.updatedDate,
-      this.createdDate,
-      this.publishedDate,
-      this.materialTypeFacet,
-      this.kicker,
-      this.desFacet,
-      this.orgFacet,
-      this.perFacet,
-      this.geoFacet,
-      this.multimedia,
-      this.shortUrl});
+      {required this.section,
+      required this.subsection,
+      required this.title,
+      required this.abstract,
+      required this.url,
+      required this.uri,
+      required this.byline,
+      required this.itemType,
+      required this.updatedDate,
+      required this.createdDate,
+      required this.publishedDate,
+      required this.materialTypeFacet,
+      required this.kicker,
+      required this.desFacet,
+      required this.orgFacet,
+      required this.perFacet,
+      required this.geoFacet,
+      required this.multimedia,
+      required this.shortUrl});
 
-  Article.fromJson(Map<String, dynamic> json) {
-    section = json['section'];
-    subsection = json['subsection'];
-    title = json['title'];
-    abstract = json['abstract'];
-    url = json['url'];
-    uri = json['uri'];
-    byline = json['byline'];
-    itemType = json['item_type'];
-    updatedDate = json['updated_date'];
-    createdDate = json['created_date'];
-    publishedDate = json['published_date'];
-    materialTypeFacet = json['material_type_facet'];
-    kicker = json['kicker'];
-    desFacet = json['des_facet'].cast<String>();
-    orgFacet = json['org_facet'].cast<String>();
-    perFacet = json['per_facet'].cast<String>();
-    geoFacet = json['geo_facet'].cast<String>();
-    if (json['multimedia'] != null) {
-      multimedia = <Multimedia>[];
-      json['multimedia'].forEach((v) {
-        multimedia!.add(new Multimedia.fromJson(v));
-      });
-    }
-    shortUrl = json['short_url'];
-  }
+  Article.fromJson(Map<String, dynamic> json)
+      : section = json['section'],
+        subsection = json['subsection'],
+        title = json['title'],
+        abstract = json['abstract'],
+        url = json['url'],
+        uri = json['uri'],
+        byline = json['byline'],
+        itemType = json['item_type'],
+        updatedDate = json['updated_date'],
+        createdDate = json['created_date'],
+        publishedDate = json['published_date'],
+        materialTypeFacet = json['material_type_facet'],
+        kicker = json['kicker'],
+        desFacet = json['des_facet'].cast<String>(),
+        orgFacet = json['org_facet'].cast<String>(),
+        perFacet = json['per_facet'].cast<String>(),
+        geoFacet = json['geo_facet'].cast<String>(),
+        multimedia = List.generate(json['multimedia'].length,
+            (index) => Multimedia.fromJson(json['multimedia'][index])),
+        shortUrl = json['short_url'];
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
@@ -87,7 +82,7 @@ class Article {
     data['per_facet'] = perFacet;
     data['geo_facet'] = geoFacet;
     if (multimedia != null) {
-      data['multimedia'] = multimedia!.map((v) => v.toJson()).toList();
+      data['multimedia'] = multimedia.map((v) => v.toJson()).toList();
     }
     data['short_url'] = shortUrl;
     return data;
@@ -95,35 +90,34 @@ class Article {
 }
 
 class Multimedia {
-  String? url;
-  String? format;
-  int? height;
-  int? width;
-  String? type;
-  String? subtype;
-  String? caption;
-  String? copyright;
+  String url;
+  String format;
+  int height;
+  int width;
+  String type;
+  String subtype;
+  String caption;
+  String copyright;
 
   Multimedia(
-      {this.url,
-      this.format,
-      this.height,
-      this.width,
-      this.type,
-      this.subtype,
-      this.caption,
-      this.copyright});
+      {required this.url,
+      required this.format,
+      required this.height,
+      required this.width,
+      required this.type,
+      required this.subtype,
+      required this.caption,
+      required this.copyright});
 
-  Multimedia.fromJson(Map<String, dynamic> json) {
-    url = json['url'];
-    format = json['format'];
-    height = json['height'];
-    width = json['width'];
-    type = json['type'];
-    subtype = json['subtype'];
-    caption = json['caption'];
-    copyright = json['copyright'];
-  }
+  Multimedia.fromJson(Map<String, dynamic> json)
+      : url = json['url'],
+        format = json['format'],
+        height = json['height'],
+        width = json['width'],
+        type = json['type'],
+        subtype = json['subtype'],
+        caption = json['caption'],
+        copyright = json['copyright'];
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();

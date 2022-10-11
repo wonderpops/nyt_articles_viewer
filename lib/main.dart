@@ -22,12 +22,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Quiz app!',
       theme: ThemeData(
-        colorSchemeSeed: Color.fromARGB(255, 247, 192, 229),
+        colorSchemeSeed: Color.fromARGB(255, 89, 110, 170),
         brightness: Brightness.light,
         useMaterial3: true,
       ),
       darkTheme: ThemeData(
-        colorSchemeSeed: Color.fromARGB(255, 252, 202, 235),
+        colorSchemeSeed: Color.fromARGB(255, 89, 110, 170),
         brightness: Brightness.dark,
         useMaterial3: true,
       ),

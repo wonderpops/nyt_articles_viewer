@@ -41,7 +41,7 @@ class _MainLayoutWidgetState extends State<MainLayoutWidget> {
                   ? colorScheme.onBackground
                   : colorScheme.onBackground,
               unselectedItemColor: colorScheme.onBackground.withOpacity(.7),
-              backgroundColor: colorScheme.inversePrimary,
+              backgroundColor: colorScheme.primaryContainer,
             ),
           ),
         ),

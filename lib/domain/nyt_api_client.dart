@@ -13,12 +13,15 @@ class NytApiClient {
 
   Future<List<Article>> getArticles({String section = 'home'}) async {
     final url = Uri.parse('$_host/$section.json?api-key=$_apiKey');
-    final response =
-        await _client.get(url, headers: {'Accept': 'application/json'});
+    final response = await _client.get(url, headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json; charset=utf-8'
+    });
 
     if (response.statusCode == 200) {
       // inspect(response);
-      final json = convert.jsonDecode(response.body) as Map;
+      final json =
+          convert.jsonDecode(convert.utf8.decode(response.bodyBytes)) as Map;
       // inspect(json);
       List<Article> articles = [];
       for (var i = 0; i < json['results'].length; i++) {
