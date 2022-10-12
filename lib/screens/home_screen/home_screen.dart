@@ -135,96 +135,117 @@ class _ArticlePreviewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: SizedBox(
-        child: Card(
-          clipBehavior: Clip.hardEdge,
-          elevation: 0,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: AspectRatio(
-                    aspectRatio: 4.0 / 3.0,
-                    child: FittedBox(
-                      fit: BoxFit.cover,
-                      clipBehavior: Clip.hardEdge,
-                      child: Image.network(article.multimedia.first.url),
-                    ),
-                  ),
-                ),
-              ),
-              Flexible(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
+      child: GestureDetector(
+        onTap: () => print('article_page'),
+        child: SizedBox(
+          child: Card(
+            clipBehavior: Clip.hardEdge,
+            elevation: 0,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Stack(
                     children: [
-                      Flexible(
-                        child: Opacity(
-                          opacity: .4,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Flexible(
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.person, size: 16),
-                                    Flexible(
-                                      child: AutoSizeText(
-                                        article.byline,
-                                        maxFontSize: 12,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Flexible(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    const Icon(Icons.date_range, size: 16),
-                                    Flexible(
-                                      child: AutoSizeText(
-                                        DateFormat('yyyy.MM.dd kk:mm').format(
-                                            DateTime.parse(
-                                                article.createdDate)),
-                                        maxFontSize: 12,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: AspectRatio(
+                          aspectRatio: 4.0 / 3.0,
+                          child: FittedBox(
+                            fit: BoxFit.cover,
+                            clipBehavior: Clip.hardEdge,
+                            child: Image.network(article.multimedia.first.url),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      AutoSizeText(
-                        article.title,
-                        style: GoogleFonts.barlowCondensed(),
-                        minFontSize: 22,
-                        maxLines: 5,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      Positioned(
+                          left: 12,
+                          top: 12,
+                          child: Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: colorScheme.tertiaryContainer),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 2),
+                              child: Text(article.section),
+                            ),
+                          )),
                     ],
                   ),
                 ),
-              )
-            ],
+                Flexible(
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: Opacity(
+                            opacity: .4,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Flexible(
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.person, size: 16),
+                                      Flexible(
+                                        child: AutoSizeText(
+                                          article.byline,
+                                          maxFontSize: 12,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Flexible(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      const Icon(Icons.date_range, size: 16),
+                                      Flexible(
+                                        child: AutoSizeText(
+                                          DateFormat('yyyy.MM.dd kk:mm').format(
+                                              DateTime.parse(
+                                                  article.createdDate)),
+                                          maxFontSize: 12,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        AutoSizeText(
+                          article.title,
+                          style: GoogleFonts.barlowCondensed(),
+                          minFontSize: 22,
+                          maxLines: 5,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),
