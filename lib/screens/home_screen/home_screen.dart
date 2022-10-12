@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,7 +26,14 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     articlesBloc = BlocProvider.of<ArticlesBloc>(context);
     articlesBloc.add(ArticlesLoadEvent());
     pageController = PageController();
+
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
   }
 
   jumpToPage(pageIndex) {
@@ -103,11 +112,15 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
               ),
             );
           }
+          if (state is NewArticlesLoadedState) {
+            setState(() {});
+          }
         },
         builder: (context, state) {
           switch (state.runtimeType) {
             case ArticlesLoadedState:
             case ArticleViewState:
+            case NewArticlesLoadedState:
               List<ArticlePreview> articles = articlesBloc.articles;
               int maxArticlesOnPageCount = 5;
               return PageView.builder(

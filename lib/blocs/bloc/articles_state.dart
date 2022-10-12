@@ -17,3 +17,5 @@ class ArticleViewState extends ArticlesState {
   final Image? backgroundImage;
   ArticleViewState({required this.articleUrl, required this.backgroundImage});
 }
+
+class NewArticlesLoadedState extends ArticlesState {}

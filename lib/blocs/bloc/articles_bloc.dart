@@ -16,12 +16,14 @@ class ArticlesBloc extends Bloc<ArticlesEvent, ArticlesState> {
   ArticlesBloc() : super(ArticlesInitial()) {
     on<ArticlesLoadEvent>(onArticlesLoading);
     on<ArticleViewEvent>(onArticleView);
+    on<CheckNewArticlesEvent>(onCheckNewArticles);
   }
   onArticlesLoading(
       ArticlesLoadEvent event, Emitter<ArticlesState> emit) async {
     emit(ArticlesLoadingState());
-    articles = await nytApiClient.getArticles();
-    // inspect(articles);
+    List<ArticlePreview> a = await nytApiClient.getArticles();
+    articles = a;
+    inspect(articles);
     emit(ArticlesLoadedState(articles: articles));
   }
 
@@ -32,5 +34,35 @@ class ArticlesBloc extends Bloc<ArticlesEvent, ArticlesState> {
       articleUrl: event.articleUrl,
       backgroundImage: Image.network(article.multimedia.first.url),
     ));
+  }
+
+  onCheckNewArticles(
+      CheckNewArticlesEvent event, Emitter<ArticlesState> emit) async {
+    print('Cheking new articles...');
+    List<ArticlePreview> newArticles = await nytApiClient.getArticles();
+
+    // print('${newArticles.first.url} || ${articles.first.url}');
+
+    // print('${newArticles.length} ^^ ${articles.length}');
+
+    for (var i = 0; i < newArticles.length; i++) {
+      bool isInsertNeeded = true;
+      for (var j = 0; j < articles.length; j++) {
+        // print('${newArticles[i].url} || ${articles[j].url}');
+        if (newArticles[i].url == articles[j].url) {
+          isInsertNeeded = false;
+        }
+      }
+      if (isInsertNeeded) {
+        print('Was inserted new article in position $i');
+        articles.insert(i, newArticles[i]);
+      }
+    }
+
+    if (articles.length > 40) {
+      articles.removeRange(40, articles.length);
+    }
+
+    emit(NewArticlesLoadedState());
   }
 }

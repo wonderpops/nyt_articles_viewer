@@ -12,20 +12,42 @@ import 'package:uni_links/uni_links.dart';
 bool _initialURILinkHandled = false;
 
 void main() {
-  runApp(BlocProvider(
-    create: (context) => ArticlesBloc(),
-    child: const MyApp(),
-  ));
+  ArticlesBloc articlesBloc = ArticlesBloc();
+  runApp(
+    BlocProvider(
+      create: (context) => articlesBloc,
+      child: MyApp(),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late Timer newArticleChecker;
+  @override
+  void initState() {
+    ArticlesBloc articlesBloc = BlocProvider.of<ArticlesBloc>(context);
+    newArticleChecker = Timer.periodic(const Duration(seconds: 60),
+        (_) => articlesBloc.add(CheckNewArticlesEvent()));
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    newArticleChecker.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Quiz app!',
+      title: 'The NYT top stories',
       theme: ThemeData(
         colorSchemeSeed: Color.fromARGB(255, 89, 110, 170),
         brightness: Brightness.light,

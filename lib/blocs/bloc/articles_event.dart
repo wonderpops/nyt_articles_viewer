@@ -10,3 +10,5 @@ class ArticleViewEvent extends ArticlesEvent {
 
   ArticleViewEvent({required this.articleUrl});
 }
+
+class CheckNewArticlesEvent extends ArticlesEvent {}
