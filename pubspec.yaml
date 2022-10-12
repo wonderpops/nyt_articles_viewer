@@ -37,6 +37,7 @@ dependencies:
   auto_size_text: ^3.0.0
   google_fonts: ^3.0.1
   intl: ^0.17.0
+  webview_flutter: ^3.0.4
 
 
   # The following adds the Cupertino Icons font to your application.

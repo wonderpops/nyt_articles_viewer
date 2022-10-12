@@ -4,8 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:nyt_articles_viewer/blocs/bloc/articles_bloc.dart';
+import 'package:nyt_articles_viewer/screens/article_screen/article_screen.dart';
 
-import '../../models/article_model.dart';
+import '../../models/article_preview_model.dart';
 
 class HomeScreenWidget extends StatefulWidget {
   const HomeScreenWidget({super.key});
@@ -30,8 +31,8 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     pageController.jumpToPage(pageIndex);
   }
 
-  List<Widget> buildArticlesPage(
-      context, List<Article> pageArticles, int currentPage, int pageCount) {
+  List<Widget> buildArticlesPage(context, List<ArticlePreview> pageArticles,
+      int currentPage, int pageCount) {
     List<Widget> pageWidgets = [];
     ColorScheme colorScheme = Theme.of(context).colorScheme;
 
@@ -90,20 +91,31 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     return Scaffold(
       extendBody: true,
       backgroundColor: colorScheme.surfaceVariant.withOpacity(.4),
-      body: BlocBuilder<ArticlesBloc, ArticlesState>(
+      body: BlocConsumer<ArticlesBloc, ArticlesState>(
+        listener: (context, state) {
+          if (state is ArticleViewState) {
+            Navigator.of(context).push(
+              PageRouteBuilder(
+                pageBuilder: (_, __, ___) => const ArticleScreenWidget(),
+                transitionDuration: const Duration(milliseconds: 300),
+                transitionsBuilder: (_, a, __, c) =>
+                    FadeTransition(opacity: a, child: c),
+              ),
+            );
+          }
+        },
         builder: (context, state) {
           switch (state.runtimeType) {
             case ArticlesLoadedState:
-              ArticlesLoadedState articlesLoadedState =
-                  articlesBloc.state as ArticlesLoadedState;
-              List<Article> articles = articlesLoadedState.articles;
+            case ArticleViewState:
+              List<ArticlePreview> articles = articlesBloc.articles;
               int maxArticlesOnPageCount = 5;
               return PageView.builder(
                   physics: const NeverScrollableScrollPhysics(),
                   controller: pageController,
                   itemCount: (articles.length / maxArticlesOnPageCount).ceil(),
                   itemBuilder: (context, page) {
-                    List<Article> pageArticles;
+                    List<ArticlePreview> pageArticles;
                     if ((page + 1) * maxArticlesOnPageCount < articles.length) {
                       pageArticles = articles
                           .getRange(
@@ -131,7 +143,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
 class _ArticlePreviewWidget extends StatelessWidget {
   const _ArticlePreviewWidget({super.key, required this.article});
-  final Article article;
+  final ArticlePreview article;
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +151,10 @@ class _ArticlePreviewWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: GestureDetector(
-        onTap: () => print('article_page'),
+        onTap: () {
+          ArticlesBloc articlesBloc = BlocProvider.of<ArticlesBloc>(context);
+          articlesBloc.add(ArticleViewEvent(articleUrl: article.url));
+        },
         child: SizedBox(
           child: Card(
             clipBehavior: Clip.hardEdge,

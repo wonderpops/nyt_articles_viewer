@@ -1,4 +1,4 @@
-class Article {
+class ArticlePreview {
   String section;
   String subsection;
   String title;
@@ -19,7 +19,7 @@ class Article {
   List<Multimedia> multimedia;
   String shortUrl;
 
-  Article(
+  ArticlePreview(
       {required this.section,
       required this.subsection,
       required this.title,
@@ -40,7 +40,7 @@ class Article {
       required this.multimedia,
       required this.shortUrl});
 
-  Article.fromJson(Map<String, dynamic> json)
+  ArticlePreview.fromJson(Map<String, dynamic> json)
       : section = json['section'],
         subsection = json['subsection'],
         title = json['title'],

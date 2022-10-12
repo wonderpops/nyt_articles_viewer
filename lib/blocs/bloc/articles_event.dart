@@ -4,3 +4,9 @@ part of 'articles_bloc.dart';
 abstract class ArticlesEvent {}
 
 class ArticlesLoadEvent extends ArticlesEvent {}
+
+class ArticleViewEvent extends ArticlesEvent {
+  final String articleUrl;
+
+  ArticleViewEvent({required this.articleUrl});
+}

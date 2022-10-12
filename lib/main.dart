@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nyt_articles_viewer/blocs/bloc/articles_bloc.dart';
 import 'package:nyt_articles_viewer/main_layout.dart';
 import 'package:nyt_articles_viewer/screens/home_screen/home_screen.dart';
 import 'package:uni_links/uni_links.dart';
@@ -10,7 +12,10 @@ import 'package:uni_links/uni_links.dart';
 bool _initialURILinkHandled = false;
 
 void main() {
-  runApp(const MyApp());
+  runApp(BlocProvider(
+    create: (context) => ArticlesBloc(),
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
