@@ -22,12 +22,12 @@ class _MainLayoutWidgetState extends State<MainLayoutWidget> {
   Widget build(BuildContext context) {
     ColorScheme colorScheme = Theme.of(context).colorScheme;
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Theme.of(context).colorScheme.surface,
+      statusBarColor: Theme.of(context).colorScheme.surfaceVariant,
       statusBarIconBrightness:
           Theme.of(context).colorScheme.brightness == Brightness.light
               ? Brightness.dark
               : Brightness.light,
-      systemNavigationBarColor: Theme.of(context).colorScheme.surface,
+      systemNavigationBarColor: Theme.of(context).colorScheme.surfaceVariant,
     ));
     return SafeArea(
       child: Scaffold(
@@ -48,7 +48,7 @@ class _MainLayoutWidgetState extends State<MainLayoutWidget> {
                 ? colorScheme.onBackground
                 : colorScheme.onBackground,
             unselectedItemColor: colorScheme.onBackground.withOpacity(.7),
-            backgroundColor: colorScheme.background,
+            backgroundColor: colorScheme.surfaceVariant,
           ),
         ),
       ),
