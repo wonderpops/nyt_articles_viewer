@@ -52,7 +52,7 @@ class _ArticleScreenWidgetState extends State<ArticleScreenWidget> {
                         },
                         style: ElevatedButton.styleFrom(
                           shape: const CircleBorder(),
-                          padding: const EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(16),
                           backgroundColor:
                               Colors.transparent, // <-- Button color
                           foregroundColor:
@@ -68,7 +68,7 @@ class _ArticleScreenWidgetState extends State<ArticleScreenWidget> {
                         },
                         style: ElevatedButton.styleFrom(
                           shape: const CircleBorder(),
-                          padding: const EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(16),
                           backgroundColor:
                               Colors.transparent, // <-- Button color
                           foregroundColor:
@@ -85,7 +85,7 @@ class _ArticleScreenWidgetState extends State<ArticleScreenWidget> {
                     fit: StackFit.expand,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: ClipRRect(
                             borderRadius: BorderRadius.circular(20),
                             child: WebView(
@@ -103,7 +103,7 @@ class _ArticleScreenWidgetState extends State<ArticleScreenWidget> {
                       Visibility(
                         visible: !isPageReady,
                         child: Padding(
-                            padding: const EdgeInsets.all(16),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: ClipRRect(
                                 borderRadius: BorderRadius.circular(20),
                                 child: Container(
@@ -149,40 +149,58 @@ class _BackgroundWidget extends StatelessWidget {
                     Positioned.fill(
                         bottom: 0,
                         child: Align(
-                          alignment: Alignment.bottomCenter,
+                          alignment: Alignment.topCenter,
                           child: Container(
                             decoration: BoxDecoration(
                                 gradient: LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
                               stops: const [
-                                0,
-                                0.9,
+                                0.2,
+                                1,
                               ],
                               colors: [
-                                colorScheme.surfaceVariant.withOpacity(.0),
                                 colorScheme.surfaceVariant,
+                                colorScheme.surfaceVariant.withOpacity(.0),
                               ],
                             )),
-                            height: 50,
+                            height: 30,
                             width: double.maxFinite,
                           ),
-                        ))
+                        )),
+                    Positioned.fill(
+                        child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          stops: const [
+                            0,
+                            0.9,
+                          ],
+                          colors: [
+                            colorScheme.surfaceVariant.withOpacity(.0),
+                            colorScheme.surfaceVariant,
+                          ],
+                        )),
+                        height: 50,
+                        width: double.maxFinite,
+                      ),
+                    ))
                   ],
                 ),
               ),
               const Flexible(child: SizedBox())
             ],
           ),
-          ClipRRect(
-            // Clip it cleanly.
-            child: BackdropFilter(
-              filter: ImageFilter.blur(
-                  sigmaX: 5, sigmaY: 5, tileMode: TileMode.clamp),
-              child: Container(
-                alignment: Alignment.center,
-                color: colorScheme.background.withOpacity(.1),
-              ),
+          BackdropFilter(
+            filter: ImageFilter.blur(
+                sigmaX: 5, sigmaY: 5, tileMode: TileMode.clamp),
+            child: Container(
+              alignment: Alignment.center,
+              color: colorScheme.background.withOpacity(.1),
             ),
           ),
         ],
