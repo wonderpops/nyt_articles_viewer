@@ -2,10 +2,13 @@ import 'dart:async';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:nyt_articles_viewer/blocs/bloc/articles_bloc.dart';
+import 'package:nyt_articles_viewer/models/section_model.dart';
 import 'package:nyt_articles_viewer/screens/article_screen/article_screen.dart';
 
 import '../../models/article_preview_model.dart';
@@ -20,12 +23,28 @@ class HomeScreenWidget extends StatefulWidget {
 class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   late ArticlesBloc articlesBloc;
   late PageController pageController;
+  final double appbarHeight = 60;
+  late ScrollController _scrollViewController;
+
+  bool isScrollingDown = false;
+  bool isScrolling = false;
+
+  double lastOffset = 0;
+  double offset = 0;
+  bool isFilterCoosing = false;
+  Section? selectedSection;
 
   @override
   void initState() {
     articlesBloc = BlocProvider.of<ArticlesBloc>(context);
-    articlesBloc.add(ArticlesLoadEvent());
+    if (articlesBloc.articles.length == 0) {
+      articlesBloc.add(ArticlesLoadEvent());
+    }
+
     pageController = PageController();
+
+    _scrollViewController = ScrollController();
+    _scrollViewController.addListener(calcOffset);
 
     super.initState();
   }
@@ -36,6 +55,48 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     super.dispose();
   }
 
+  calcOffset() {
+    if (_scrollViewController.position.userScrollDirection ==
+        ScrollDirection.reverse) {
+      if (!isScrollingDown) {
+        isScrolling = true;
+        lastOffset = _scrollViewController.offset;
+        isScrollingDown = true;
+      }
+    }
+
+    if (_scrollViewController.position.userScrollDirection ==
+        ScrollDirection.forward) {
+      if (isScrollingDown) {
+        isScrolling = true;
+        isScrollingDown = false;
+        lastOffset = _scrollViewController.offset - appbarHeight;
+      }
+    }
+
+    offset = _scrollViewController.offset - lastOffset;
+
+    offset = offset > appbarHeight
+        ? appbarHeight
+        : offset < 0
+            ? 0
+            : offset;
+
+    if (_scrollViewController.offset == 0) {
+      offset = 0;
+    }
+
+    if (offset != appbarHeight && offset != 0) {
+      setState(() {});
+    }
+
+    if (offset == appbarHeight || offset == 0) {
+      isScrolling = false;
+    }
+
+    // print('$lastOffset | $offset');
+  }
+
   jumpToPage(pageIndex) {
     pageController.jumpToPage(pageIndex);
   }
@@ -44,15 +105,6 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
       int currentPage, int pageCount) {
     List<Widget> pageWidgets = [];
     ColorScheme colorScheme = Theme.of(context).colorScheme;
-
-    pageWidgets.add(
-      AppBar(
-        title: const Text('The NYT top stories'),
-        primary: false,
-        backgroundColor: Colors.transparent,
-        automaticallyImplyLeading: false,
-      ),
-    );
 
     pageWidgets += pageArticles
         .map<Widget>((article) => _ArticlePreviewWidget(article: article))
@@ -100,55 +152,231 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     return Scaffold(
       extendBody: true,
       backgroundColor: colorScheme.surfaceVariant.withOpacity(.4),
-      body: BlocConsumer<ArticlesBloc, ArticlesState>(
-        listener: (context, state) {
-          if (state is ArticleViewState) {
-            Navigator.of(context).push(
-              PageRouteBuilder(
-                pageBuilder: (_, __, ___) => const ArticleScreenWidget(),
-                transitionDuration: const Duration(milliseconds: 300),
-                transitionsBuilder: (_, a, __, c) =>
-                    FadeTransition(opacity: a, child: c),
-              ),
-            );
-          }
-          if (state is NewArticlesLoadedState) {
-            setState(() {});
-          }
-        },
-        builder: (context, state) {
-          switch (state.runtimeType) {
-            case ArticlesLoadedState:
-            case ArticleViewState:
-            case NewArticlesLoadedState:
-              List<ArticlePreview> articles = articlesBloc.articles;
-              int maxArticlesOnPageCount = 5;
-              return PageView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  controller: pageController,
-                  itemCount: (articles.length / maxArticlesOnPageCount).ceil(),
-                  itemBuilder: (context, page) {
-                    List<ArticlePreview> pageArticles;
-                    if ((page + 1) * maxArticlesOnPageCount < articles.length) {
-                      pageArticles = articles
-                          .getRange(
-                            page * maxArticlesOnPageCount,
-                            (page + 1) * maxArticlesOnPageCount,
-                          )
+      body: Stack(
+        children: [
+          Padding(
+            padding: EdgeInsets.only(top: appbarHeight - offset),
+            child: BlocConsumer<ArticlesBloc, ArticlesState>(
+              listener: (context, state) {
+                if (state is ArticleViewState) {
+                  Navigator.of(context).push(
+                    PageRouteBuilder(
+                      pageBuilder: (_, __, ___) => const ArticleScreenWidget(),
+                      transitionDuration: const Duration(milliseconds: 300),
+                      transitionsBuilder: (_, a, __, c) =>
+                          FadeTransition(opacity: a, child: c),
+                    ),
+                  );
+                }
+                if (state is NewArticlesLoadedState) {
+                  setState(() {});
+                }
+              },
+              builder: (context, state) {
+                switch (state.runtimeType) {
+                  case ArticlesLoadedState:
+                  case ArticleViewState:
+                  case NewArticlesLoadedState:
+                    late List<ArticlePreview> articles;
+                    if (selectedSection != null) {
+                      articles = articlesBloc.articles
+                          .where((element) =>
+                              element.section == selectedSection!.name)
                           .toList();
                     } else {
-                      pageArticles =
-                          articles.skip(page * maxArticlesOnPageCount).toList();
+                      articles = articlesBloc.articles;
+                    }
+                    int maxArticlesOnPageCount = 5;
+                    if (articles.length > 0) {
+                      return PageView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          controller: pageController,
+                          itemCount:
+                              (articles.length / maxArticlesOnPageCount).ceil(),
+                          itemBuilder: (context, page) {
+                            List<ArticlePreview> pageArticles;
+                            if ((page + 1) * maxArticlesOnPageCount <
+                                articles.length) {
+                              pageArticles = articles
+                                  .getRange(
+                                    page * maxArticlesOnPageCount,
+                                    (page + 1) * maxArticlesOnPageCount,
+                                  )
+                                  .toList();
+                            } else {
+                              pageArticles = articles
+                                  .skip(page * maxArticlesOnPageCount)
+                                  .toList();
+                            }
+
+                            return ListView(
+                                controller: _scrollViewController,
+                                children: buildArticlesPage(
+                                    context,
+                                    pageArticles,
+                                    page,
+                                    (articles.length / maxArticlesOnPageCount)
+                                        .ceil()));
+                          });
+                    } else {
+                      return const Center(
+                        child: Text('Articles not found'),
+                      );
                     }
 
-                    return ListView(
-                        children: buildArticlesPage(context, pageArticles, page,
-                            (articles.length / maxArticlesOnPageCount).ceil()));
-                  });
-            default:
-              return Container();
-          }
-        },
+                  default:
+                    return const Center(
+                      child: SizedBox(
+                        height: 50,
+                        width: 50,
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                }
+              },
+            ),
+          ),
+          Opacity(
+            opacity: 1 - offset / appbarHeight,
+            child: Container(
+              color: colorScheme.surfaceVariant,
+              child: SafeArea(
+                bottom: false,
+                child: SizedBox(
+                  height: appbarHeight - offset,
+                  width: double.maxFinite,
+                  child: Transform.translate(
+                    offset: Offset(0, offset * -1),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8, horizontal: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const AutoSizeText(
+                            'The NYT top stories',
+                            minFontSize: 18,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Row(
+                            children: [
+                              Stack(
+                                children: [
+                                  IconButton(
+                                    onPressed: () {
+                                      isFilterCoosing = true;
+                                      setState(() {});
+                                    },
+                                    icon: const Icon(Icons.filter_list_alt),
+                                  ),
+                                  Visibility(
+                                    visible: selectedSection != null,
+                                    child: Positioned(
+                                        right: 8,
+                                        top: 8,
+                                        child: Container(
+                                          height: 8,
+                                          width: 8,
+                                          decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              color: colorScheme.error),
+                                        )),
+                                  )
+                                ],
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                onPressed: () {},
+                                icon: const Icon(Icons.notifications),
+                              )
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Visibility(
+            visible: isFilterCoosing,
+            child: Container(
+              color: colorScheme.background.withOpacity(.6),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          isFilterCoosing = false;
+                          setState(() {});
+                        },
+                        icon: Icon(Icons.cancel_outlined,
+                            color: Colors.white.withOpacity(.8)),
+                      ),
+                      Card(
+                        elevation: 10,
+                        child: SizedBox(
+                            width: double.maxFinite,
+                            height: 300,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: GridView.count(
+                                childAspectRatio: 3 / 1,
+                                mainAxisSpacing: 8,
+                                crossAxisSpacing: 8,
+                                crossAxisCount: 2,
+                                children: sections
+                                    .map((e) => GestureDetector(
+                                          onTap: () {
+                                            isFilterCoosing = false;
+                                            selectedSection = e;
+                                            setState(() {});
+                                          },
+                                          child: Container(
+                                            height: 40,
+                                            decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                color: colorScheme
+                                                    .tertiaryContainer),
+                                            child: Center(
+                                                child: AutoSizeText(e.name)),
+                                          ),
+                                        ))
+                                    .toList(),
+                              ),
+                            )),
+                      ),
+                      Center(
+                        child: TextButton(
+                          onPressed: () {
+                            isFilterCoosing = false;
+                            selectedSection = null;
+                            setState(() {});
+                          },
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.all(8),
+                            textStyle: const TextStyle(fontSize: 20),
+                          ),
+                          child: const Text(
+                            'Cancel all filters',
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          )
+        ],
       ),
     );
   }
@@ -188,7 +416,9 @@ class _ArticlePreviewWidget extends StatelessWidget {
                           child: FittedBox(
                             fit: BoxFit.cover,
                             clipBehavior: Clip.hardEdge,
-                            child: Image.network(article.multimedia.first.url),
+                            child: Image.network(
+                              article.multimedia.first.url,
+                            ),
                           ),
                         ),
                       ),
@@ -201,7 +431,7 @@ class _ArticlePreviewWidget extends StatelessWidget {
                                 color: colorScheme.tertiaryContainer),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 2),
+                                  horizontal: 12, vertical: 2),
                               child: Text(article.section),
                             ),
                           )),
