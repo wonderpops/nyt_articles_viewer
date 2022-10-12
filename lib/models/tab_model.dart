@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nyt_articles_viewer/screens/search_screen/search_screen.dart';
 
 import '../screens/home_screen/home_screen.dart';
 
@@ -29,6 +30,6 @@ List<AppTab> appTabs = [
       icon: Icon(Icons.search),
       label: 'Search',
     ),
-    relatedWidget: const HomeScreenWidget(),
+    relatedWidget: const SearchScreenWidget(),
   ),
 ];
