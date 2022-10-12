@@ -255,6 +255,7 @@ class _ArticlePreviewWidget extends StatelessWidget {
                           maxLines: 5,
                           overflow: TextOverflow.ellipsis,
                         ),
+                        const SizedBox(height: 16),
                       ],
                     ),
                   ),
