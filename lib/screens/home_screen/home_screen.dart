@@ -227,7 +227,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                           });
                     } else {
                       return const Center(
-                        child: Text('Articles not found'),
+                        child: Text('Articles not found 😢'),
                       );
                     }
 
@@ -309,7 +309,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
           Visibility(
             visible: isFilterCoosing,
             child: Container(
-              color: colorScheme.background.withOpacity(.6),
+              color: Colors.black.withOpacity(.6),
               child: Center(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 32),

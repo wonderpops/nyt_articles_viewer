@@ -189,7 +189,7 @@ class _SearchScreenWidgetState extends State<SearchScreenWidget>
                   height: double.maxFinite,
                   child: Center(
                       child: AutoSizeText(
-                    'Articles not found',
+                    'Articles not found 😢',
                     minFontSize: 18,
                   )),
                 ),
@@ -234,10 +234,11 @@ class _ArticlePreviewWidget extends StatelessWidget {
                         clipBehavior: Clip.hardEdge,
                         child: CachedNetworkImage(
                           imageUrl: article.multimediaUrl,
-                          placeholder: (context, url) => const SizedBox(
-                            width: 50,
-                            height: 50,
-                            child: CircularProgressIndicator(),
+                          placeholder: (context, url) => Padding(
+                            padding: const EdgeInsets.all(50),
+                            child: CircularProgressIndicator(
+                              color: colorScheme.tertiary,
+                            ),
                           ),
                           errorWidget: (context, url, error) =>
                               const Icon(Icons.error),

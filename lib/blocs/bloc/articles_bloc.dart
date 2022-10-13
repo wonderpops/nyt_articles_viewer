@@ -54,63 +54,68 @@ class ArticlesBloc extends Bloc<ArticlesEvent, ArticlesState> {
       ArticlesLoadEvent event, Emitter<ArticlesState> emit) async {
     emit(ArticlesLoadingState());
 
-    List<ArticlePreview> receivedArticles = await nytApiClient.getArticles();
+    try {
+      List<ArticlePreview> receivedArticles = await nytApiClient.getArticles();
+      var box = await Hive.openBox<ArticlePreview>('articlesBox');
 
-    var box = await Hive.openBox<ArticlePreview>('articlesBox');
+      List<ArticlePreview> storedArticles = box.values.toList();
 
-    List<ArticlePreview> storedArticles = box.values.toList();
+      List compareResults =
+          compareArticlesLists(storedArticles, receivedArticles);
+      if (compareResults[0]) {
+        await box.clear();
 
-    List compareResults =
-        compareArticlesLists(storedArticles, receivedArticles);
+        for (int i = 0; i < compareResults[1].length; i++) {
+          await box.add(compareResults[1][i]);
+        }
 
-    if (compareResults[0]) {
-      await box.clear();
-
-      for (int i = 0; i < compareResults[1].length; i++) {
-        await box.add(compareResults[1][i]);
+        articles = compareResults[1];
       }
+    } catch (e) {
+      var box = await Hive.openBox<ArticlePreview>('articlesBox');
+      articles = box.values.toList();
     }
 
-    articles = compareResults[1];
-
-    emit(ArticlesLoadedState(articles: storedArticles));
+    emit(ArticlesLoadedState(articles: articles));
   }
 
   onArticleView(ArticleViewEvent event, Emitter<ArticlesState> emit) async {
-    // if (articles.isEmpty) {
-    //   var box = await Hive.openBox<ArticlePreview>('articlesBox');
-
-    //   articles = box.values.toList();
-    // }
+    if (articles.isEmpty) {
+      var box = await Hive.openBox<ArticlePreview>('articlesBox');
+      articles = box.values.toList();
+    }
     int articleIndex = articles.indexWhere((a) => a.url == event.articleUrl);
     emit(ArticleViewState(
       articleUrl: event.articleUrl,
-      backgroundImage: articleIndex == -1
-          ? null
-          : Image.network(articles[articleIndex].multimediaUrl),
+      backgroundImageUrl:
+          articleIndex == -1 ? null : articles[articleIndex].multimediaUrl,
     ));
   }
 
   onCheckNewArticles(
       CheckNewArticlesEvent event, Emitter<ArticlesState> emit) async {
     print('Cheking new articles...');
-    List<ArticlePreview> newArticles = await nytApiClient.getArticles();
-    var box = await Hive.openBox<ArticlePreview>('articlesBox');
+    try {
+      List<ArticlePreview> newArticles = await nytApiClient.getArticles();
+      var box = await Hive.openBox<ArticlePreview>('articlesBox');
 
-    List<ArticlePreview> storedArticles = box.values.toList();
+      List<ArticlePreview> storedArticles = box.values.toList();
 
-    List compareResults = compareArticlesLists(storedArticles, newArticles);
+      List compareResults = compareArticlesLists(storedArticles, newArticles);
 
-    if (compareResults[0]) {
-      await box.clear();
+      if (compareResults[0]) {
+        await box.clear();
 
-      for (int i = 0; i < compareResults[1].length; i++) {
-        await box.add(compareResults[1][i]);
+        for (int i = 0; i < compareResults[1].length; i++) {
+          await box.add(compareResults[1][i]);
+        }
       }
+
+      articles = compareResults[1];
+
+      emit(NewArticlesLoadedState());
+    } catch (e) {
+      emit(NewArticlesLoadedState());
     }
-
-    articles = compareResults[1];
-
-    emit(NewArticlesLoadedState());
   }
 }

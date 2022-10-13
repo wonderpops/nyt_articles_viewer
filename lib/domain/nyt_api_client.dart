@@ -16,7 +16,7 @@ class NytApiClient {
     final response = await _client.get(url, headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json; charset=utf-8'
-    });
+    }).timeout(const Duration(seconds: 5));
 
     if (response.statusCode == 200) {
       // inspect(response);

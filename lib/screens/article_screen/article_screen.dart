@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/widgets/container.dart';
@@ -26,6 +27,7 @@ class ArticleScreenWidget extends StatefulWidget {
 
 class _ArticleScreenWidgetState extends State<ArticleScreenWidget> {
   bool isPageReady = false;
+  bool hasWebViewError = false;
 
   @override
   void initState() {
@@ -44,7 +46,7 @@ class _ArticleScreenWidgetState extends State<ArticleScreenWidget> {
         body: Stack(
           children: [
             _BackgroundWidget(
-              multimedia: articleViewState.backgroundImage,
+              multimediaUrl: articleViewState.backgroundImageUrl,
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,13 +101,16 @@ class _ArticleScreenWidgetState extends State<ArticleScreenWidget> {
                           borderRadius: BorderRadius.circular(20),
                           child: WebView(
                             javascriptMode: JavascriptMode.unrestricted,
-                            // navigationDelegate: (NavigationRequest request) {
-                            //   return NavigationDecision.prevent;
-                            // },
+                            navigationDelegate: (NavigationRequest request) {
+                              return NavigationDecision.prevent;
+                            },
                             onPageStarted: (url) {
                               print(url);
                             },
-
+                            onWebResourceError: (error) {
+                              isPageReady = true;
+                              hasWebViewError = true;
+                            },
                             onPageFinished: (str) {
                               isPageReady = true;
                               setState(() {});
@@ -126,6 +131,21 @@ class _ArticleScreenWidgetState extends State<ArticleScreenWidget> {
                                       child: CircularProgressIndicator()),
                                 ))),
                       ),
+                      Visibility(
+                        visible: hasWebViewError,
+                        child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: Container(
+                                  color: colorScheme.surface,
+                                  child: const Center(
+                                      child: AutoSizeText(
+                                    "Can't load article 😢",
+                                    minFontSize: 20,
+                                  )),
+                                ))),
+                      ),
                     ],
                   ),
                 ),
@@ -139,13 +159,13 @@ class _ArticleScreenWidgetState extends State<ArticleScreenWidget> {
 }
 
 class _BackgroundWidget extends StatelessWidget {
-  const _BackgroundWidget({super.key, required this.multimedia});
-  final Image? multimedia;
+  const _BackgroundWidget({super.key, required this.multimediaUrl});
+  final String? multimediaUrl;
 
   @override
   Widget build(BuildContext context) {
     ColorScheme colorScheme = Theme.of(context).colorScheme;
-    if (multimedia is Image) {
+    if (multimediaUrl?.runtimeType == String) {
       return Stack(
         fit: StackFit.expand,
         children: [
@@ -158,7 +178,13 @@ class _BackgroundWidget extends StatelessWidget {
                     FittedBox(
                       fit: BoxFit.fitHeight,
                       clipBehavior: Clip.hardEdge,
-                      child: multimedia,
+                      child: multimediaUrl != null
+                          ? CachedNetworkImage(
+                              imageUrl: multimediaUrl ?? '',
+                              errorWidget: (context, url, error) =>
+                                  const Icon(Icons.error),
+                            )
+                          : Container(),
                     ),
                     Positioned.fill(
                         bottom: 0,
