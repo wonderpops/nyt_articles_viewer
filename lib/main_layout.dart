@@ -22,7 +22,7 @@ class _MainLayoutWidgetState extends State<MainLayoutWidget> {
   Widget build(BuildContext context) {
     ColorScheme colorScheme = Theme.of(context).colorScheme;
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Theme.of(context).colorScheme.surfaceVariant,
+      statusBarColor: Theme.of(context).colorScheme.background,
       statusBarIconBrightness:
           Theme.of(context).colorScheme.brightness == Brightness.light
               ? Brightness.dark
@@ -37,19 +37,18 @@ class _MainLayoutWidgetState extends State<MainLayoutWidget> {
           borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(20), topRight: Radius.circular(20)),
           child: BottomNavigationBar(
-            items: appTabs.map((e) => e.bnbItem).toList(),
-            currentIndex: _currentIndex,
-            onTap: (index) {
-              setState(() {
-                _currentIndex = index;
-              });
-            },
-            selectedItemColor: colorScheme.brightness == Brightness.light
-                ? colorScheme.onBackground
-                : colorScheme.onBackground,
-            unselectedItemColor: colorScheme.onBackground.withOpacity(.7),
-            backgroundColor: colorScheme.surfaceVariant,
-          ),
+              items: appTabs.map((e) => e.bnbItem).toList(),
+              currentIndex: _currentIndex,
+              onTap: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+              selectedItemColor: colorScheme.brightness == Brightness.light
+                  ? colorScheme.onBackground
+                  : colorScheme.onBackground,
+              unselectedItemColor: colorScheme.onBackground.withOpacity(.7),
+              backgroundColor: colorScheme.surface),
         ),
       ),
     );

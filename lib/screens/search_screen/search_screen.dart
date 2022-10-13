@@ -37,6 +37,7 @@ class _SearchScreenWidgetState extends State<SearchScreenWidget>
     articlesBloc = BlocProvider.of<ArticlesBloc>(context);
     _scrollViewController = ScrollController();
     _scrollViewController.addListener(calcOffset);
+    searchResults = articlesBloc.articles;
     super.initState();
   }
 
@@ -47,7 +48,7 @@ class _SearchScreenWidgetState extends State<SearchScreenWidget>
     super.dispose();
   }
 
-  searchArticles(String query) async {
+  searchArticles(String query) {
     List<ArticlePreview> results = [];
     if (query != '') {
       for (var i = 0; i < articlesBloc.articles.length; i++) {
@@ -58,10 +59,13 @@ class _SearchScreenWidgetState extends State<SearchScreenWidget>
           results.add(articlesBloc.articles[i]);
         }
       }
+    } else {
+      searchResults = articlesBloc.articles;
+      setState(() {});
+      return;
     }
 
     searchResults = results;
-    // print(results.length);
     setState(() {});
   }
 
@@ -110,7 +114,6 @@ class _SearchScreenWidgetState extends State<SearchScreenWidget>
   @override
   Widget build(BuildContext context) {
     ColorScheme colorScheme = Theme.of(context).colorScheme;
-
     return BlocListener<ArticlesBloc, ArticlesState>(
       listener: (context, state) {
         if (articlesBloc.state is ArticleViewState) {
@@ -125,60 +128,72 @@ class _SearchScreenWidgetState extends State<SearchScreenWidget>
         }
       },
       child: Scaffold(
-        backgroundColor: colorScheme.surfaceVariant.withOpacity(.4),
+        backgroundColor: colorScheme.brightness == Brightness.light
+            ? Color.fromARGB(255, 233, 232, 240)
+            : Color.fromARGB(100, 0, 0, 0),
         body: SafeArea(
             child: Column(
           children: [
-            Builder(builder: (context) {
-              return Opacity(
-                opacity: 1 - offset / appbarHeight,
-                child: Container(
-                  color: colorScheme.surfaceVariant,
-                  child: SizedBox(
-                    height: appbarHeight - offset,
-                    width: double.maxFinite,
-                    child: SafeArea(
-                      child: Transform.translate(
-                        offset: Offset(0, offset * -1),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Center(
-                            child: TextField(
-                                decoration: InputDecoration(
-                                  suffixIcon: const Icon(Icons.search),
-                                  enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(20.0),
-                                      borderSide: BorderSide(
-                                          width: 1,
-                                          color: colorScheme.surface
-                                              .withOpacity(.4))),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(20.0),
-                                    borderSide: BorderSide(
-                                        color: colorScheme.primary
-                                            .withOpacity(.4)),
-                                  ),
-                                  labelText: 'Search...',
-                                  hintText: 'Type query or section name',
-                                ),
-                                onChanged: (query) async {
-                                  searchArticles(query);
-                                }),
-                          ),
-                        ),
+            Opacity(
+              opacity: 1 - offset / appbarHeight,
+              child: Container(
+                color: colorScheme.surface,
+                child: SizedBox(
+                  height: appbarHeight - offset,
+                  width: double.maxFinite,
+                  child: Transform.translate(
+                    offset: Offset(0, offset * -1),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(
+                        child: TextField(
+                            decoration: InputDecoration(
+                              suffixIcon: const Icon(Icons.search),
+                              enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(20.0),
+                                  borderSide: BorderSide(
+                                      width: 1,
+                                      color:
+                                          colorScheme.outline.withOpacity(.4))),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20.0),
+                                borderSide: BorderSide(
+                                    color: colorScheme.primary.withOpacity(.4)),
+                              ),
+                              labelText: 'Search...',
+                              hintText: 'Type query or section name',
+                            ),
+                            onChanged: (query) async {
+                              searchArticles(query);
+                            }),
                       ),
                     ),
                   ),
                 ),
-              );
-            }),
-            Flexible(
-              child: ListView.builder(
-                  controller: _scrollViewController,
-                  itemCount: searchResults.length,
-                  itemBuilder: (context, index) =>
-                      _ArticlePreviewWidget(article: searchResults[index])),
+              ),
             ),
+            if (searchResults.isNotEmpty)
+              Flexible(
+                child: ListView.builder(
+                    controller: _scrollViewController,
+                    itemCount: searchResults.length,
+                    itemBuilder: (context, index) {
+                      return _ArticlePreviewWidget(
+                          article: searchResults[index]);
+                    }),
+              ),
+            if (searchResults.isEmpty)
+              const Flexible(
+                child: SizedBox(
+                  width: double.maxFinite,
+                  height: double.maxFinite,
+                  child: Center(
+                      child: AutoSizeText(
+                    'Articles not found',
+                    minFontSize: 18,
+                  )),
+                ),
+              ),
           ],
         )),
       ),

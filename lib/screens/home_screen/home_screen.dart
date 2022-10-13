@@ -156,7 +156,9 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       extendBody: true,
-      backgroundColor: colorScheme.surfaceVariant.withOpacity(.4),
+      backgroundColor: colorScheme.brightness == Brightness.light
+          ? Color.fromARGB(255, 233, 232, 240)
+          : Color.fromARGB(100, 0, 0, 0),
       body: Stack(
         children: [
           Padding(
@@ -244,63 +246,60 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
           Opacity(
             opacity: 1 - offset / appbarHeight,
             child: Container(
-              color: colorScheme.surfaceVariant,
-              child: SafeArea(
-                bottom: false,
-                child: SizedBox(
-                  height: appbarHeight - offset,
-                  width: double.maxFinite,
-                  child: Transform.translate(
-                    offset: Offset(0, offset * -1),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 8, horizontal: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const AutoSizeText(
-                            'The NYT top stories',
-                            minFontSize: 18,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Row(
-                            children: [
-                              Stack(
-                                children: [
-                                  IconButton(
-                                    onPressed: () {
-                                      isFilterCoosing = true;
-                                      setState(() {});
-                                    },
-                                    icon: const Icon(Icons.filter_list_alt),
-                                  ),
-                                  Visibility(
-                                    visible: selectedSection != null,
-                                    child: Positioned(
-                                        right: 8,
-                                        top: 8,
-                                        child: Container(
-                                          height: 8,
-                                          width: 8,
-                                          decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                              color: colorScheme.error),
-                                        )),
-                                  )
-                                ],
-                              ),
-                              const SizedBox(width: 8),
-                              IconButton(
-                                onPressed: () async {
-                                  // articlesBloc.add(CheckNewArticlesEvent());
-                                },
-                                icon: const Icon(Icons.notifications),
-                              )
-                            ],
-                          ),
-                        ],
-                      ),
+              color: colorScheme.surface,
+              child: SizedBox(
+                height: appbarHeight - offset,
+                width: double.maxFinite,
+                child: Transform.translate(
+                  offset: Offset(0, offset * -1),
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const AutoSizeText(
+                          'The NYT top stories',
+                          minFontSize: 18,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Row(
+                          children: [
+                            Stack(
+                              children: [
+                                IconButton(
+                                  onPressed: () {
+                                    isFilterCoosing = true;
+                                    setState(() {});
+                                  },
+                                  icon: const Icon(Icons.filter_list_alt),
+                                ),
+                                Visibility(
+                                  visible: selectedSection != null,
+                                  child: Positioned(
+                                      right: 8,
+                                      top: 8,
+                                      child: Container(
+                                        height: 8,
+                                        width: 8,
+                                        decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            color: colorScheme.error),
+                                      )),
+                                )
+                              ],
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              onPressed: () async {
+                                // articlesBloc.add(CheckNewArticlesEvent());
+                              },
+                              icon: const Icon(Icons.notifications),
+                            )
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ),

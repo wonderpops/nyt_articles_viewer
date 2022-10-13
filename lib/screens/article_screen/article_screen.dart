@@ -10,6 +10,8 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:nyt_articles_viewer/main_layout.dart';
+import 'package:nyt_articles_viewer/screens/home_screen/home_screen.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../blocs/bloc/articles_bloc.dart';
@@ -24,6 +26,13 @@ class ArticleScreenWidget extends StatefulWidget {
 
 class _ArticleScreenWidgetState extends State<ArticleScreenWidget> {
   bool isPageReady = false;
+
+  @override
+  void initState() {
+    if (Platform.isAndroid) WebView.platform = AndroidWebView();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     ArticlesBloc articlesBloc = BlocProvider.of<ArticlesBloc>(context);
@@ -87,18 +96,23 @@ class _ArticleScreenWidgetState extends State<ArticleScreenWidget> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
-                            child: WebView(
-                              navigationDelegate: (NavigationRequest request) {
-                                return NavigationDecision.prevent;
-                              },
-                              onPageStarted: (url) {},
-                              onPageFinished: (str) {
-                                isPageReady = true;
-                                setState(() {});
-                              },
-                              initialUrl: articleViewState.articleUrl,
-                            )),
+                          borderRadius: BorderRadius.circular(20),
+                          child: WebView(
+                            javascriptMode: JavascriptMode.unrestricted,
+                            // navigationDelegate: (NavigationRequest request) {
+                            //   return NavigationDecision.prevent;
+                            // },
+                            onPageStarted: (url) {
+                              print(url);
+                            },
+
+                            onPageFinished: (str) {
+                              isPageReady = true;
+                              setState(() {});
+                            },
+                            initialUrl: articleViewState.articleUrl,
+                          ),
+                        ),
                       ),
                       Visibility(
                         visible: !isPageReady,
@@ -108,7 +122,7 @@ class _ArticleScreenWidgetState extends State<ArticleScreenWidget> {
                                 borderRadius: BorderRadius.circular(20),
                                 child: Container(
                                   color: colorScheme.surface,
-                                  child: Center(
+                                  child: const Center(
                                       child: CircularProgressIndicator()),
                                 ))),
                       ),

@@ -53,7 +53,9 @@ class ArticlesBloc extends Bloc<ArticlesEvent, ArticlesState> {
   onArticlesLoading(
       ArticlesLoadEvent event, Emitter<ArticlesState> emit) async {
     emit(ArticlesLoadingState());
+
     List<ArticlePreview> receivedArticles = await nytApiClient.getArticles();
+
     var box = await Hive.openBox<ArticlePreview>('articlesBox');
 
     List<ArticlePreview> storedArticles = box.values.toList();
@@ -75,11 +77,17 @@ class ArticlesBloc extends Bloc<ArticlesEvent, ArticlesState> {
   }
 
   onArticleView(ArticleViewEvent event, Emitter<ArticlesState> emit) async {
-    ArticlePreview article =
-        articles.firstWhere((a) => a.url == event.articleUrl);
+    // if (articles.isEmpty) {
+    //   var box = await Hive.openBox<ArticlePreview>('articlesBox');
+
+    //   articles = box.values.toList();
+    // }
+    int articleIndex = articles.indexWhere((a) => a.url == event.articleUrl);
     emit(ArticleViewState(
       articleUrl: event.articleUrl,
-      backgroundImage: Image.network(article.multimediaUrl),
+      backgroundImage: articleIndex == -1
+          ? null
+          : Image.network(articles[articleIndex].multimediaUrl),
     ));
   }
 

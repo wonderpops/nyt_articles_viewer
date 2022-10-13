@@ -23,7 +23,7 @@ List<AppTab> appTabs = [
       icon: Icon(Icons.star_rate_rounded),
       label: 'Favorites',
     ),
-    relatedWidget: const HomeScreenWidget(),
+    relatedWidget: Container(),
   ),
   AppTab(
     bnbItem: const BottomNavigationBarItem(

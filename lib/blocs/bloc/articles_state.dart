@@ -15,7 +15,7 @@ class ArticlesLoadedState extends ArticlesState {
 class ArticleViewState extends ArticlesState {
   final String articleUrl;
   final Image? backgroundImage;
-  ArticleViewState({required this.articleUrl, required this.backgroundImage});
+  ArticleViewState({required this.articleUrl, this.backgroundImage});
 }
 
 class NewArticlesLoadedState extends ArticlesState {}
