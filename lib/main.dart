@@ -41,8 +41,11 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late Timer newArticleChecker;
+  StreamSubscription? _sub;
+
   @override
   void initState() {
+    initUniLinks();
     ArticlesBloc articlesBloc = BlocProvider.of<ArticlesBloc>(context);
     newArticleChecker = Timer.periodic(const Duration(seconds: 60),
         (_) => articlesBloc.add(CheckNewArticlesEvent()));
@@ -51,8 +54,25 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void dispose() {
+    _sub?.cancel();
     newArticleChecker.cancel();
     super.dispose();
+  }
+
+  Future<void> initUniLinks() async {
+    // ... check initialLink
+
+    // Attach a listener to the stream
+    _sub = linkStream.listen((String? link) {
+      if (link != null) {
+        ArticlesBloc articlesBloc = BlocProvider.of<ArticlesBloc>(context);
+        articlesBloc.add(ArticleViewEvent(articleUrl: link));
+      }
+    }, onError: (err) {
+      // Handle exception by warning the user their action did not succeed
+    });
+
+    // NOTE: Don't forget to call _sub.cancel() in dispose()
   }
 
   @override
@@ -73,64 +93,5 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       home: const MainLayoutWidget(),
     );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  StreamSubscription? _sub;
-
-  @override
-  void initState() {
-    initUniLinks();
-    super.initState();
-  }
-
-  Future<void> initUniLinks() async {
-    // ... check initialLink
-
-    // Attach a listener to the stream
-    _sub = linkStream.listen((String? link) {
-      print('kist');
-    }, onError: (err) {
-      // Handle exception by warning the user their action did not succeed
-    });
-
-    // NOTE: Don't forget to call _sub.cancel() in dispose()
-  }
-
-  @override
-  void dispose() {
-    _sub?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-        ),
-        body: Center(
-            child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              ListTile(
-                title: const Text("Initial Link"),
-                subtitle: Text('asfasf'),
-              ),
-            ],
-          ),
-        )));
   }
 }

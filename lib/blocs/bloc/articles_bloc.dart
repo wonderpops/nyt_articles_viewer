@@ -19,17 +19,21 @@ class ArticlesBloc extends Bloc<ArticlesEvent, ArticlesState> {
 
   List compareArticlesLists(List<ArticlePreview> storedArticles,
       List<ArticlePreview> receivedArticles) {
-    if (receivedArticles.length > 0) {
+    bool wasMerged = false;
+    if (receivedArticles.isNotEmpty) {
       for (var i = 0; i < receivedArticles.length; i++) {
         bool isInsertNeeded = true;
         for (var j = 0; j < storedArticles.length; j++) {
-          // print('${receivedArticles[i].url} || ${articles[j].url}');
+          // print('$i - ${receivedArticles[i].url} || ${articles[j].url}');
           if (receivedArticles[i].url == storedArticles[j].url) {
             isInsertNeeded = false;
+            break;
           }
         }
+
         if (isInsertNeeded) {
-          print('Was inserted new article in position $i');
+          wasMerged = true;
+
           storedArticles.insert(i, receivedArticles[i]);
         }
       }
@@ -38,7 +42,7 @@ class ArticlesBloc extends Bloc<ArticlesEvent, ArticlesState> {
         storedArticles.removeRange(40, storedArticles.length);
       }
     }
-    return [false, storedArticles];
+    return [wasMerged, storedArticles];
   }
 
   ArticlesBloc() : super(ArticlesInitial()) {
