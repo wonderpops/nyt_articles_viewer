@@ -21,4 +21,4 @@ application features:
 ![search_and_filters_screenshot](/screenshots/image5.png)
 
 ## Demo video
-[![demo_video](https://img.youtube.com/vi/rPXqYi3ibg4/0.jpg)](https://www.youtube.com/watch?v=rPXqYi3ibg4)
+[https://www.youtube.com/watch?v=rPXqYi3ibg4](https://www.youtube.com/watch?v=rPXqYi3ibg4)
