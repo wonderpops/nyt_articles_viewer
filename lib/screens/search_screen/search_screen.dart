@@ -1,4 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -216,7 +217,16 @@ class _ArticlePreviewWidget extends StatelessWidget {
                       child: FittedBox(
                         fit: BoxFit.cover,
                         clipBehavior: Clip.hardEdge,
-                        child: Image.network(article.multimedia.first.url),
+                        child: CachedNetworkImage(
+                          imageUrl: article.multimediaUrl,
+                          placeholder: (context, url) => const SizedBox(
+                            width: 50,
+                            height: 50,
+                            child: CircularProgressIndicator(),
+                          ),
+                          errorWidget: (context, url, error) =>
+                              const Icon(Icons.error),
+                        ),
                       ),
                     ),
                   ),

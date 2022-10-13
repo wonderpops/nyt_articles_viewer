@@ -1,10 +1,14 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:hive/hive.dart';
 import 'package:meta/meta.dart';
 import 'package:nyt_articles_viewer/domain/nyt_api_client.dart';
 import 'package:nyt_articles_viewer/models/article_preview_model.dart';
+import 'package:path_provider/path_provider.dart' as pathProvider;
+import 'package:http/http.dart' as http;
 
 part 'articles_event.dart';
 part 'articles_state.dart';
@@ -12,6 +16,30 @@ part 'articles_state.dart';
 class ArticlesBloc extends Bloc<ArticlesEvent, ArticlesState> {
   final NytApiClient nytApiClient = NytApiClient();
   List<ArticlePreview> articles = [];
+
+  List compareArticlesLists(List<ArticlePreview> storedArticles,
+      List<ArticlePreview> receivedArticles) {
+    if (receivedArticles.length > 0) {
+      for (var i = 0; i < receivedArticles.length; i++) {
+        bool isInsertNeeded = true;
+        for (var j = 0; j < storedArticles.length; j++) {
+          // print('${receivedArticles[i].url} || ${articles[j].url}');
+          if (receivedArticles[i].url == storedArticles[j].url) {
+            isInsertNeeded = false;
+          }
+        }
+        if (isInsertNeeded) {
+          print('Was inserted new article in position $i');
+          storedArticles.insert(i, receivedArticles[i]);
+        }
+      }
+
+      if (storedArticles.length > 40) {
+        storedArticles.removeRange(40, storedArticles.length);
+      }
+    }
+    return [false, storedArticles];
+  }
 
   ArticlesBloc() : super(ArticlesInitial()) {
     on<ArticlesLoadEvent>(onArticlesLoading);
@@ -21,10 +49,25 @@ class ArticlesBloc extends Bloc<ArticlesEvent, ArticlesState> {
   onArticlesLoading(
       ArticlesLoadEvent event, Emitter<ArticlesState> emit) async {
     emit(ArticlesLoadingState());
-    List<ArticlePreview> a = await nytApiClient.getArticles();
-    articles = a;
-    inspect(articles);
-    emit(ArticlesLoadedState(articles: articles));
+    List<ArticlePreview> receivedArticles = await nytApiClient.getArticles();
+    var box = await Hive.openBox<ArticlePreview>('articlesBox');
+
+    List<ArticlePreview> storedArticles = box.values.toList();
+
+    List compareResults =
+        compareArticlesLists(storedArticles, receivedArticles);
+
+    if (compareResults[0]) {
+      await box.clear();
+
+      for (int i = 0; i < compareResults[1].length; i++) {
+        await box.add(compareResults[1][i]);
+      }
+    }
+
+    articles = compareResults[1];
+
+    emit(ArticlesLoadedState(articles: storedArticles));
   }
 
   onArticleView(ArticleViewEvent event, Emitter<ArticlesState> emit) async {
@@ -32,7 +75,7 @@ class ArticlesBloc extends Bloc<ArticlesEvent, ArticlesState> {
         articles.firstWhere((a) => a.url == event.articleUrl);
     emit(ArticleViewState(
       articleUrl: event.articleUrl,
-      backgroundImage: Image.network(article.multimedia.first.url),
+      backgroundImage: Image.network(article.multimediaUrl),
     ));
   }
 
@@ -40,28 +83,21 @@ class ArticlesBloc extends Bloc<ArticlesEvent, ArticlesState> {
       CheckNewArticlesEvent event, Emitter<ArticlesState> emit) async {
     print('Cheking new articles...');
     List<ArticlePreview> newArticles = await nytApiClient.getArticles();
+    var box = await Hive.openBox<ArticlePreview>('articlesBox');
 
-    // print('${newArticles.first.url} || ${articles.first.url}');
+    List<ArticlePreview> storedArticles = box.values.toList();
 
-    // print('${newArticles.length} ^^ ${articles.length}');
+    List compareResults = compareArticlesLists(storedArticles, newArticles);
 
-    for (var i = 0; i < newArticles.length; i++) {
-      bool isInsertNeeded = true;
-      for (var j = 0; j < articles.length; j++) {
-        // print('${newArticles[i].url} || ${articles[j].url}');
-        if (newArticles[i].url == articles[j].url) {
-          isInsertNeeded = false;
-        }
-      }
-      if (isInsertNeeded) {
-        print('Was inserted new article in position $i');
-        articles.insert(i, newArticles[i]);
+    if (compareResults[0]) {
+      await box.clear();
+
+      for (int i = 0; i < compareResults[1].length; i++) {
+        await box.add(compareResults[1][i]);
       }
     }
 
-    if (articles.length > 40) {
-      articles.removeRange(40, articles.length);
-    }
+    articles = compareResults[1];
 
     emit(NewArticlesLoadedState());
   }

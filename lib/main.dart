@@ -1,18 +1,29 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive/hive.dart';
 import 'package:nyt_articles_viewer/blocs/bloc/articles_bloc.dart';
 import 'package:nyt_articles_viewer/main_layout.dart';
 import 'package:nyt_articles_viewer/screens/home_screen/home_screen.dart';
 import 'package:uni_links/uni_links.dart';
 
+import 'models/article_preview_model.dart';
+import 'package:path_provider/path_provider.dart' as pathProvider;
+
 bool _initialURILinkHandled = false;
 
-void main() {
+void main() async {
   ArticlesBloc articlesBloc = ArticlesBloc();
+  WidgetsFlutterBinding.ensureInitialized();
+  Directory directory = await pathProvider.getApplicationDocumentsDirectory();
+  Hive
+    ..init(directory.path)
+    ..registerAdapter(ArticleAdapter());
+
   runApp(
     BlocProvider(
       create: (context) => articlesBloc,

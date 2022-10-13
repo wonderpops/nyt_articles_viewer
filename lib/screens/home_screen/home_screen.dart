@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:nyt_articles_viewer/blocs/bloc/articles_bloc.dart';
 import 'package:nyt_articles_viewer/models/section_model.dart';
@@ -51,7 +53,10 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
+    pageController.dispose();
+    _scrollViewController.removeListener(calcOffset);
+    _scrollViewController.dispose();
+
     super.dispose();
   }
 
@@ -287,7 +292,9 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                               ),
                               const SizedBox(width: 8),
                               IconButton(
-                                onPressed: () {},
+                                onPressed: () async {
+                                  // articlesBloc.add(CheckNewArticlesEvent());
+                                },
                                 icon: const Icon(Icons.notifications),
                               )
                             ],
@@ -416,8 +423,16 @@ class _ArticlePreviewWidget extends StatelessWidget {
                           child: FittedBox(
                             fit: BoxFit.cover,
                             clipBehavior: Clip.hardEdge,
-                            child: Image.network(
-                              article.multimedia.first.url,
+                            child: CachedNetworkImage(
+                              imageUrl: article.multimediaUrl,
+                              placeholder: (context, url) => Padding(
+                                padding: const EdgeInsets.all(100),
+                                child: CircularProgressIndicator(
+                                  color: colorScheme.tertiary,
+                                ),
+                              ),
+                              errorWidget: (context, url, error) =>
+                                  const Icon(Icons.error),
                             ),
                           ),
                         ),
