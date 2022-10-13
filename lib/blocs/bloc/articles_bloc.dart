@@ -19,6 +19,12 @@ class ArticlesBloc extends Bloc<ArticlesEvent, ArticlesState> {
 
   List compareArticlesLists(List<ArticlePreview> storedArticles,
       List<ArticlePreview> receivedArticles) {
+    if (storedArticles.isEmpty) {
+      return [true, receivedArticles];
+    }
+    if (receivedArticles.isEmpty) {
+      return [true, storedArticles];
+    }
     bool wasMerged = false;
     if (receivedArticles.isNotEmpty) {
       for (var i = 0; i < receivedArticles.length; i++) {
@@ -75,6 +81,8 @@ class ArticlesBloc extends Bloc<ArticlesEvent, ArticlesState> {
       var box = await Hive.openBox<ArticlePreview>('articlesBox');
       articles = box.values.toList();
     }
+
+    inspect(articles);
 
     emit(ArticlesLoadedState(articles: articles));
   }

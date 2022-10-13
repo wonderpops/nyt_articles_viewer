@@ -148,6 +148,7 @@ class _SearchScreenWidgetState extends State<SearchScreenWidget>
                       child: Center(
                         child: TextField(
                             decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.all(10.0),
                               suffixIcon: const Icon(Icons.search),
                               enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(20.0),
