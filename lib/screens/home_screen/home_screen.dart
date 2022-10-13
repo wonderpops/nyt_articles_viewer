@@ -507,9 +507,19 @@ class _ArticlePreviewWidget extends StatelessWidget {
                         const SizedBox(height: 16),
                         AutoSizeText(
                           article.title,
-                          style: GoogleFonts.barlowCondensed(),
-                          minFontSize: 22,
+                          style: GoogleFonts.barlowCondensed(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          minFontSize: 24,
                           maxLines: 5,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 8),
+                        AutoSizeText(
+                          article.abstract,
+                          style: GoogleFonts.barlowCondensed(),
+                          minFontSize: 18,
+                          maxLines: 10,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 16),
