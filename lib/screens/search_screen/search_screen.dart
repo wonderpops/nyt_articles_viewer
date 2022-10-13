@@ -252,6 +252,7 @@ class _ArticlePreviewWidget extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(8),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         AutoSizeText(
@@ -261,26 +262,29 @@ class _ArticlePreviewWidget extends StatelessWidget {
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        Flexible(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Flexible(
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.person, size: 16),
-                                    Flexible(
-                                      child: AutoSizeText(
-                                        article.byline,
-                                        maxFontSize: 12,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    )
-                                  ],
+                        Visibility(
+                          visible: article.byline.isNotEmpty,
+                          child: Flexible(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Flexible(
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.person, size: 16),
+                                      Flexible(
+                                        child: AutoSizeText(
+                                          article.byline,
+                                          maxFontSize: 12,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      )
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                         Flexible(
